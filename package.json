@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "Card sharing for the Star Tribune",
   "main": "build/index.html",
-  "dependencies": {},
+  "dependencies": {
+    "webfontloader": "^1.6.28"
+  },
   "devDependencies": {
     "babel-loader": "^7.1.4",
     "browser-sync": "^2.23.6",

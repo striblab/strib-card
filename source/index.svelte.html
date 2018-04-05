@@ -74,6 +74,7 @@
 
 <script>
 import ColorPicker from './components/color-picker.svelte.html';
+import WebFont from 'webfontloader';
 import { observeMany } from 'svelte-extras';
 
 export default {
@@ -96,9 +97,17 @@ export default {
     ];
     this.observeMany(renderables, this.render, { init: false });
 
-    // Initial render
-    // TODO: Need to wait for fonts to load
-    this.render();
+    // Wait for fonts to load, set message
+    let defaultQuote = this.get('quote');
+    this.set({ quote: 'Loading fonts...' });
+    WebFont.load({
+      custom: {
+        families: this.get('fonts')
+      },
+      active: () => {
+        this.set({ quote: defaultQuote });
+      }
+    });
   },
 
   data: () => {
@@ -153,7 +162,7 @@ export default {
     },
 
     // Main render function
-    render: function() {
+    render() {
       let canvas = this.refs.output;
       let context = canvas.getContext('2d');
 
@@ -226,7 +235,7 @@ export default {
 
     // Takes some text and some parameters and breaks into
     // multiple lines.
-    layoutText: function(text, maxWidth, font, size) {
+    layoutText(text, maxWidth, font, size) {
       let canvas = this.refs.output;
       let context = canvas.getContext('2d');
       let lines = [];
@@ -280,6 +289,9 @@ export default {
       }
       return lines;
     },
+
+    // Load fonts
+    loadFonts() {},
 
     // Proxy around set for events
     proxySet(e, k, v) {
