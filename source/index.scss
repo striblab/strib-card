@@ -1,0 +1,69 @@
+
+@import '../node_modules/strib-styles/source/styles/default.scss';
+
+.output,
+.controls {
+  height: 100vh;
+  float: left;
+}
+
+.output {
+  width: 66.66665%;
+  background-color: map-get($grays, 'darker');
+  position: relative;
+  z-index: -99;
+}
+
+.controls {
+  width: 33.33332%;
+  overflow-y: auto;
+  border-left: 1px solid map-get($grays, 'medium');
+  z-index: 99;
+}
+
+.output-inner,
+.controls-inner {
+  padding: 1em;
+}
+
+.ouput-preview {
+  background-color: white;
+
+  object-fit: contain;
+  height: 100%;
+  width: 100%;
+
+  // position: absolute;
+  // top: 50%;
+  // left: 50%;
+  // transform: translate(-50%, -50%);
+}
+
+.button-group {
+  font-size: 0.5em;
+  margin-bottom: 2em;
+
+  button {
+    display: inline-block;
+  }
+}
+
+.form-element-inline {
+  display: flex;
+  margin-bottom: 1em;
+
+  label,
+  input {
+    // :(
+    margin: 0 !important;
+  }
+
+  label {
+    white-space: nowrap;
+    padding-right: 1em;
+  }
+}
+
+.download-placeholder {
+  display: none;
+}

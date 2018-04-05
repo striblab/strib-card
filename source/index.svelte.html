@@ -1,0 +1,252 @@
+<:Head>
+</:Head>
+
+<main>
+  <div class="strib-card cf">
+    <div class="output">
+      <div class="output-inner">
+        <canvas ref:output class="ouput-preview" width="1200" height="630"></canvas>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="controls-inner">
+        <h1>Strib card</h1>
+
+        <form>
+          <label for="quote-input">Quote</label>
+          <textarea id="quote-input" bind:value="quote"></textarea>
+
+          <label for="quote-alignment" class="sr-only">Quote alignment</label>
+          <div class="button-group" id="quote-alignment" role="group">
+            <button on:click="proxySet(event, 'quoteAlignX', 'left')" class="{{ quoteAlignX === 'left' ? '' : 'light' }}">
+              <i class="fa fa-align-left"></i><span class="sr-only">Left</span>
+            </button>
+
+            <button on:click="proxySet(event, 'quoteAlignX', 'center')" class="{{ quoteAlignX === 'center' ? '' : 'light' }}">
+              <i class="fa fa-align-center"></i><span class="sr-only">Center</span>
+            </button>
+
+            <button on:click="proxySet(event, 'quoteAlignX', 'right')" class="{{ quoteAlignX === 'right' ? '' : 'light' }}">
+              <i class="fa fa-align-right"></i><span class="sr-only">Center</span>
+            </button>
+          </div>
+
+          <div class="form-element-inline">
+            <label for="quote-size">Quote size</label>
+            <input id="quote-size" bind:value="quoteSize" type="range" min="10" max="100">
+          </div>
+
+          <label for="attribution-input">Attribution</label>
+          <input type="text" id="attribution-input" bind:value="attribution">
+
+          <div class="form-element-inline">
+            <label for="attribution-size">Attribution size</label>
+            <input id="attribution-size" bind:value="attributionSize" type="range" min="10" max="100">
+          </div>
+
+          <button on:click="download(event)">Download</button>
+          <a ref:download class="download-placeholder" href="#download" download="">Download placeholder</a>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+import { observeMany } from 'svelte-extras';
+
+export default {
+  oncreate: function() {
+    // All the observes that should cause render
+    let renderables = [
+      'quote',
+      'attribution',
+      'quoteAlignX',
+      'padding',
+      'quoteSize',
+      'attributionSize'
+    ];
+    this.observeMany(renderables, this.render, { init: false });
+
+    // Initial render
+    this.render();
+  },
+
+  data: () => {
+    return {
+      quote: 'A quote would go here',
+      attribution: 'A. Name',
+      width: 1200,
+      height: 630,
+      alignY: 'center',
+      quoteAlignX: 'left',
+      font: 'monospace',
+      quoteSize: 48,
+      attributionSize: 32,
+      padding: 25
+    };
+  },
+
+  methods: {
+    observeMany,
+
+    // Download
+    download: function(e) {
+      if (e && e.preventDefault) {
+        e.preventDefault();
+      }
+
+      // Make sure render is correct
+      this.render();
+
+      // Put together download
+      let canvas = this.refs.output;
+      let download = this.refs.download;
+      let data = canvas.toDataURL();
+      download.href = data;
+      download.download = 'make-name-TODO.png';
+      download.click();
+    },
+
+    // Main render function
+    render: function() {
+      let canvas = this.refs.output;
+      let context = canvas.getContext('2d');
+
+      // Formatting
+      let quote = this.get('quote')
+        .trim()
+        .replace(/"(\w)/g, '“$1')
+        .replace(/(\S)"/g, '$1”')
+        .replace(/--/g, '—');
+      let attribution = this.get('attribution').trim();
+
+      // Set up canvas
+      canvas.width = this.get('width');
+      canvas.height = this.get('height');
+
+      // Set the background color
+      context.fillStyle = '#8899AA';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Add the image
+      // TODO
+
+      // Add logo
+      //
+
+      // Lay out the text
+      context.fillStyle = '#FFFFFF';
+      let padding = this.get('padding');
+      let maxWidth = canvas.width - padding * 2;
+      let lines = this.layoutText(
+        quote,
+        maxWidth,
+        this.get('font'),
+        this.get('quoteSize')
+      );
+
+      let attrLines = this.layoutText(
+        '    — ' + attribution,
+        maxWidth,
+        this.get('font'),
+        this.get('attributionSize')
+      );
+      attrLines.forEach(l => (l.alignment = 'right'));
+      lines = lines.concat(attrLines);
+      let height = lines.reduce((t, l) => {
+        return t + l.size * 1.2;
+      }, 0);
+
+      // Draw the text
+      let lineY = canvas.height / 2 - height / 2 + this.get('quoteSize') / 2;
+      if (this.get('alignY') === 'top') {
+        lineY = padding + settings.size;
+      } else if (this.get('alignY') === 'bottom') {
+        lineY = canvas.height - height - padding + this.get('quoteSize') / 2;
+      }
+      lines.forEach(l => {
+        let x = padding;
+        let alignment = l.alignment || this.get('quoteAlignX');
+        if (alignment == 'right') {
+          x = canvas.width - padding;
+        } else if (alignment == 'center') {
+          x = canvas.width / 2;
+        }
+        context.textAlign = alignment;
+        context.font = `${l.size}px ${this.get('font')}`;
+        context.fillText(l.text, x, lineY);
+        lineY += l.size * 1.2;
+      });
+    },
+
+    // Takes some text and some parameters and breaks into
+    // multiple lines.
+    layoutText: function(text, maxWidth, font, size) {
+      let canvas = this.refs.output;
+      let context = canvas.getContext('2d');
+      let lines = [];
+      let position = 0;
+      let buffer = '';
+      context.font = `${size}px ${font}`;
+      let die = 0;
+      while (position < text.length && die < 10000) {
+        die++;
+        let char = text[position];
+        if (char == '\n') {
+          lines.push({
+            text: buffer,
+            width: context.measureText(buffer).width,
+            size
+          });
+          position++;
+          buffer = '';
+          continue;
+        }
+
+        buffer += char;
+        let metric = context.measureText(buffer);
+        if (metric.width > maxWidth) {
+          let words = buffer.trim().split(' ');
+          if (words.length > 1) {
+            let last = words.pop();
+            if (context.measureText(last).width < maxWidth) {
+              //check for overrun
+              position -= last.length + 1;
+            }
+          } else {
+            position++;
+          }
+          words = words.join(' ');
+          lines.push({
+            text: words,
+            width: context.measureText(words).width,
+            size
+          });
+          buffer = '';
+        }
+        position++;
+      }
+      if (buffer) {
+        lines.push({
+          text: buffer.trim(),
+          width: context.measureText(buffer).width,
+          size
+        });
+      }
+      return lines;
+    },
+
+    // Proxy around set for events
+    proxySet(e, k, v) {
+      if (e && e.preventDefault) {
+        e.preventDefault();
+      }
+
+      this.set({ [k]: v });
+    }
+  }
+};
+</script>

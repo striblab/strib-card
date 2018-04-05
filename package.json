@@ -1,0 +1,45 @@
+{
+  "name": "strib-card",
+  "version": "0.0.1",
+  "description": "Card sharing for the Star Tribune",
+  "main": "build/index.html",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-loader": "^7.1.4",
+    "browser-sync": "^2.23.6",
+    "concurrently": "^3.5.1",
+    "eslint": "^4.19.1",
+    "node-sass": "^4.8.3",
+    "npm-watch": "^0.3.0",
+    "strib-styles": "git+https://github.com/striblab/strib-styles",
+    "svelte": "^1.60.2",
+    "svelte-extras": "^1.6.0",
+    "svelte-loader": "^2.7.0",
+    "uglifyjs-webpack-plugin": "^1.2.4",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "source/**/*.*"
+      ]
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack && cp ./source/index.html ./build/index.html && node-sass ./source/index.scss --source-map true > ./build/strib-card.css",
+    "server": "browser-sync start --ss build -f build",
+    "develop": "concurrently \"npm-watch\" \"npm run server\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/striblab/strib-card.git"
+  },
+  "author": "Alan Palazzolo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/striblab/strib-card/issues"
+  },
+  "homepage": "https://github.com/striblab/strib-card#readme"
+}
