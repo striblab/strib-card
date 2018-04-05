@@ -1,0 +1,37 @@
+<div id="{{ id }}" class="input-component color-picker">
+  {{#each colors as c}}
+    <div class="color {{ c === '#FFFFFF' ? 'is-white' : '' }} {{ c === color ? 'active' : '' }}"
+      style="background-color: {{ c }};"
+      on:click="setColor(c)">
+      <span class="sr-only">Change color to {{ c }}</span>
+    </div>
+  {{/each}}
+</div>
+
+<script>
+export default {
+  data: () => {
+    return {
+      colors: [
+        '#000000',
+        '#FFFFFF',
+        '#005825',
+        '#00824a',
+        '#8dc63f',
+        '#003366',
+        '#7ABDFF',
+        '#fffc19',
+        '#CCC900',
+        '#9d5d00',
+        '#9e003f'
+      ]
+    };
+  },
+
+  methods: {
+    setColor: function(color) {
+      this.set({ color: color });
+    }
+  }
+};
+</script>

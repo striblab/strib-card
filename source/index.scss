@@ -45,6 +45,7 @@
 
   button {
     display: inline-block;
+    margin-right: 0.5em;
   }
 }
 
@@ -61,6 +62,29 @@
   label {
     white-space: nowrap;
     padding-right: 1em;
+  }
+}
+
+.input-component {
+  margin-bottom: 1em;
+}
+
+.color-picker {
+  .color {
+    display: inline-block;
+    height: 1.5em;
+    width: 1.5em;
+    margin-right: 0.5em;
+    cursor: pointer;
+
+    &.is-white {
+      outline: 1px solid $color-black;
+    }
+
+    &.active {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba($color-black, 0.3);
+    }
   }
 }
 

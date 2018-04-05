@@ -17,6 +17,18 @@
           <label for="quote-input">Quote</label>
           <textarea id="quote-input" bind:value="quote"></textarea>
 
+          <label for="quote-font" class="sr-only">Quote font</label>
+          <div class="button-group" id="quote-font" role="group">
+            {{#each fonts as f}}
+              <button on:click="proxySet(event, 'font', f)"
+                class="{{ font === f ? '' : 'light' }}"
+                title="Change font to {{ f }}">
+                <span class="font-{{ kebab(f) }}">Aa</span>
+                <span class="sr-only">Change font to {{ f }}</span>
+              </button>
+            {{/each}}
+          </div>
+
           <label for="quote-alignment" class="sr-only">Quote alignment</label>
           <div class="button-group" id="quote-alignment" role="group">
             <button on:click="proxySet(event, 'quoteAlignX', 'left')" class="{{ quoteAlignX === 'left' ? '' : 'light' }}">
@@ -45,6 +57,12 @@
             <input id="attribution-size" bind:value="attributionSize" type="range" min="10" max="100">
           </div>
 
+          <label for="background-color">Background color</label>
+          <ColorPicker id="background-color" bind:color="backgroundColor" />
+
+          <label for="background-color">Foreground color</label>
+          <ColorPicker id="background-color" bind:color="foregroundColor" />
+
           <button on:click="download(event)">Download</button>
           <a ref:download class="download-placeholder" href="#download" download="">Download placeholder</a>
         </form>
@@ -55,9 +73,14 @@
 </main>
 
 <script>
+import ColorPicker from './components/color-picker.svelte.html';
 import { observeMany } from 'svelte-extras';
 
 export default {
+  components: {
+    ColorPicker
+  },
+
   oncreate: function() {
     // All the observes that should cause render
     let renderables = [
@@ -66,11 +89,15 @@ export default {
       'quoteAlignX',
       'padding',
       'quoteSize',
-      'attributionSize'
+      'attributionSize',
+      'font',
+      'backgroundColor',
+      'foregroundColor'
     ];
     this.observeMany(renderables, this.render, { init: false });
 
     // Initial render
+    // TODO: Need to wait for fonts to load
     this.render();
   },
 
@@ -82,10 +109,25 @@ export default {
       height: 630,
       alignY: 'center',
       quoteAlignX: 'left',
-      font: 'monospace',
-      quoteSize: 48,
-      attributionSize: 32,
-      padding: 25
+      backgroundColor: '#7ABDFF',
+      foregroundColor: '#FFFFFF',
+      fonts: [
+        'Benton Sans',
+        'Benton Sans Condensed',
+        'Popular',
+        'Popular Light',
+        'Popular Medium',
+        'Poynter Serif',
+        'Whitman Display',
+        'Whitman Display Condensed Bold',
+        'Whitman Display Compressed Bold',
+        'Whitman OSF',
+        'Menlo'
+      ],
+      font: 'Benton Sans',
+      quoteSize: 56,
+      attributionSize: 40,
+      padding: 50
     };
   },
 
@@ -128,7 +170,7 @@ export default {
       canvas.height = this.get('height');
 
       // Set the background color
-      context.fillStyle = '#8899AA';
+      context.fillStyle = this.get('backgroundColor');
       context.fillRect(0, 0, canvas.width, canvas.height);
 
       // Add the image
@@ -138,7 +180,7 @@ export default {
       //
 
       // Lay out the text
-      context.fillStyle = '#FFFFFF';
+      context.fillStyle = this.get('foregroundColor');
       let padding = this.get('padding');
       let maxWidth = canvas.width - padding * 2;
       let lines = this.layoutText(
@@ -246,6 +288,29 @@ export default {
       }
 
       this.set({ [k]: v });
+    }
+  },
+
+  helpers: {
+    // https://gist.github.com/tdukart/b87afb278c41245741ae7a0c355a0a0b
+    kebab: input => {
+      var result = input;
+
+      // Convert camelCase capitals to kebab-case.
+      result = result.replace(/([a-z][A-Z])/g, function(match) {
+        return match.substr(0, 1) + '-' + match.substr(1, 1).toLowerCase();
+      });
+
+      // Convert non-camelCase capitals to lowercase.
+      result = result.toLowerCase();
+
+      // Convert non-alphanumeric characters to hyphens
+      result = result.replace(/[^-a-z0-9]+/g, '-');
+
+      // Remove hyphens from both ends
+      result = result.replace(/^-+/, '').replace(/-$/, '');
+
+      return result;
     }
   }
 };
