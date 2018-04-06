@@ -14,6 +14,13 @@
         <h1>Strib card</h1>
 
         <form>
+          <label for="size-select">Size</label>
+          <select id="size-select" bind:value="size">
+            {{#each Object.entries(sizes) as [si, s]}}
+              <option value="{{si}}">{{si}}</option>
+            {{/each}}
+          </select>
+
           <label for="quote-input">Quote</label>
           <textarea id="quote-input" bind:value="quote"></textarea>
 
@@ -93,7 +100,8 @@ export default {
       'attributionSize',
       'font',
       'backgroundColor',
-      'foregroundColor'
+      'foregroundColor',
+      'size'
     ];
     this.observeMany(renderables, this.render, { init: false });
 
@@ -114,8 +122,6 @@ export default {
     return {
       quote: 'A quote would go here',
       attribution: 'A. Name',
-      width: 1200,
-      height: 630,
       alignY: 'center',
       quoteAlignX: 'left',
       backgroundColor: '#7ABDFF',
@@ -136,7 +142,13 @@ export default {
       font: 'Benton Sans',
       quoteSize: 56,
       attributionSize: 40,
-      padding: 50
+      padding: 50,
+      sizes: {
+        Facebook: [1200, 630],
+        Twitter: [1024, 512],
+        Instagram: [1080, 1080]
+      },
+      size: 'Facebook'
     };
   },
 
@@ -175,8 +187,8 @@ export default {
       let attribution = this.get('attribution').trim();
 
       // Set up canvas
-      canvas.width = this.get('width');
-      canvas.height = this.get('height');
+      canvas.width = this.get('sizes')[this.get('size')][0];
+      canvas.height = this.get('sizes')[this.get('size')][1];
 
       // Set the background color
       context.fillStyle = this.get('backgroundColor');
