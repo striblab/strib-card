@@ -383,13 +383,13 @@ export default {
     },
 
     // Download
-    download: function(e) {
+    download: async function(e) {
       if (e && e.preventDefault) {
         e.preventDefault();
       }
 
       // Make sure render is correct
-      this.render();
+      await this.render();
 
       // Put together download
       let canvas = this.refs.output;
