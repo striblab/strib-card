@@ -69,6 +69,10 @@ form {
     margin-top: -1 * $spacer;
     margin-bottom: $spacer / 0.85;
   }
+
+  input[type="range"] {
+    border: none;
+  }
 }
 
 .button-group {
