@@ -91,6 +91,13 @@
             </button>
           </div>
 
+          <label for="text-effects">Text effects</label>
+          <div class="button-group" id="text-effects" role="group">
+            <button on:click="proxyToggle(event, 'dropShadow')" class="{{ dropShadow ? '' : 'light' }}">
+              Drop shadow
+            </button>
+          </div>
+
           <label for="background-color">Background color</label>
           <ColorPicker id="background-color" bind:color="backgroundColor" />
 
@@ -166,7 +173,8 @@ export default {
       'logoProportion',
       'logoPlacement',
       'bgImage',
-      'bgPlacement'
+      'bgPlacement',
+      'dropShadow'
     ];
     this.observeMany(renderables, this.render, { init: false });
 
@@ -387,7 +395,6 @@ export default {
           let bgRatio = bgImage.width / bgImage.height;
           let canvasRatio = canvas.width / canvas.height;
 
-          console.log(bgRatio, canvasRatio);
           if (bgRatio === canvasRatio) {
             // Use default
           } else if (bgRatio < canvasRatio) {
@@ -477,6 +484,14 @@ export default {
         }
         context.textAlign = alignment;
         context.font = `${l.size}px ${this.get('font')}`;
+
+        if (this.get('dropShadow')) {
+          context.shadowOffsetX = 4;
+          context.shadowOffsetY = 4;
+          context.shadowColor = 'rgba(0, 0, 0, 0.8)';
+          context.shadowBlur = 15;
+        }
+
         context.fillText(l.text, x, lineY);
         lineY += l.size * 1.2;
       });
@@ -552,6 +567,17 @@ export default {
       }
 
       this.set({ [k]: v });
+    },
+
+    proxyToggle(e, k) {
+      if (e && e.preventDefault) {
+        e.preventDefault();
+      }
+      if (e && e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      this.set({ [k]: !this.get(k) });
     }
   },
 
