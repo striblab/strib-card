@@ -35,13 +35,54 @@
   max-height: 90vh;
 }
 
+h1 {
+  font-size: 2em;
+  margin-top: 0;
+  padding: 0;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-top: 0;
+  padding: 0;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+
+form {
+  button,
+  a[role="button"],
+  a.button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  .button {
+    padding: 0.5em 0.5em;
+  }
+
+  input ~ small,
+  select ~ small,
+  textarea ~ small {
+    margin-top: -1 * $spacer;
+    margin-bottom: $spacer / 0.85;
+  }
+}
+
 .button-group {
-  font-size: 0.5em;
-  margin-bottom: 2em;
+  font-size: 0.85em;
+  margin-bottom: 1em;
+
+  &.button-group-small {
+    font-size: 0.65em;
+  }
 
   button {
     display: inline-block;
     margin-right: 0.5em;
+    margin-bottom: 0.25em;
   }
 }
 

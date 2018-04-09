@@ -13,28 +13,22 @@
       <div class="controls-inner">
         <h1>Strib card</h1>
 
+        <p>Use the controls below to create an image to use on social media.  Use the button at the bottom to download the image.</p>
+
         <form>
-          <label for="size-select">Size</label>
+          <h2>Format</h2>
+          <label for="size-select" class="sr-only">Size</label>
           <select id="size-select" bind:value="size">
             {{#each Object.entries(sizes) as [si, s]}}
               <option value="{{si}}">{{si}}</option>
             {{/each}}
           </select>
+          <small>Each site has its own aspect ratio and ideal size.</small>
 
-          <label for="quote-input">Quote</label>
+
+          <h2>Quote</h2>
+          <label for="quote-input" class="sr-only">Quote</label>
           <textarea id="quote-input" bind:value="quote"></textarea>
-
-          <label for="quote-font" class="sr-only">Quote font</label>
-          <div class="button-group" id="quote-font" role="group">
-            {{#each fonts as f}}
-              <button on:click="proxySet(event, 'font', f)"
-                class="{{ font === f ? '' : 'light' }}"
-                title="Change font to {{ f }}">
-                <span class="font-{{ kebab(f) }}">Aa</span>
-                <span class="sr-only">Change font to {{ f }}</span>
-              </button>
-            {{/each}}
-          </div>
 
           <label for="quote-alignment" class="sr-only">Quote alignment</label>
           <div class="button-group" id="quote-alignment" role="group">
@@ -56,7 +50,9 @@
             <input id="quote-size" bind:value="quoteSize" type="range" min="10" max="100">
           </div>
 
-          <label for="attribution-input">Attribution</label>
+
+          <h2>Attribution</h2>
+          <label for="attribution-input" class="sr-only">Attribution</label>
           <input type="text" id="attribution-input" bind:value="attribution">
 
           <div class="form-element-inline">
@@ -64,7 +60,39 @@
             <input id="attribution-size" bind:value="attributionSize" type="range" min="10" max="100">
           </div>
 
-          <label for="background-image">Background image</label>
+
+          <h2>Text</h2>
+          <label for="quote-font">Font</label>
+          <div class="button-group button-group-small" id="quote-font" role="group">
+            {{#each fonts as f}}
+              <button on:click="proxySet(event, 'font', f)"
+                class="{{ font === f ? '' : 'light' }}"
+                title="Change font to {{ f }}">
+                <span class="font-{{ kebab(f) }}">Aa</span>
+                <span class="sr-only">Change font to {{ f }}</span>
+              </button>
+            {{/each}}
+          </div>
+
+          <label for="text-placement">Text placement</label>
+          <div class="button-group" id="text-placement" role="group">
+            {{#each Object.entries(textPlacements) as l}}
+              <button on:click="proxySet(event, 'textPlacement', l[0])" class="{{ textPlacement === l[0] ? '' : 'light' }}" title="{{ l[1].description }}">
+                {{{ l[1].name }}}
+              </button>
+            {{/each}}
+          </div>
+
+          <label for="text-effects">Text effects</label>
+          <div class="button-group" id="text-effects" role="group">
+            <button on:click="proxyToggle(event, 'dropShadow')" class="{{ dropShadow ? '' : 'light' }}">
+              Drop shadow
+            </button>
+          </div>
+
+
+          <h2>Background image</h2>
+          <label for="background-image" class="sr-only">Background image</label>
           <div ref:bgImage id="background-image"
             on:dragover="proxySet(event, 'bgImageOver', true)"
             on:dragenter="proxySet(event, 'bgImageOver', true)"
@@ -91,20 +119,17 @@
             </button>
           </div>
 
-          <label for="text-effects">Text effects</label>
-          <div class="button-group" id="text-effects" role="group">
-            <button on:click="proxyToggle(event, 'dropShadow')" class="{{ dropShadow ? '' : 'light' }}">
-              Drop shadow
-            </button>
-          </div>
 
+          <h2>Colors</h2>
           <label for="background-color">Background color</label>
           <ColorPicker id="background-color" bind:color="backgroundColor" />
 
           <label for="background-color">Foreground color</label>
           <ColorPicker id="background-color" bind:color="foregroundColor" />
 
-          <label for="logo">Logo</label>
+
+          <h2>Logo</h2>
+          <label for="logo" class="sr-only">Logo</label>
           <div class="button-group" id="logo" role="group">
             {{#each Object.entries(logos) as l}}
               <button on:click="proxySet(event, 'logo', l[0])" class="button-outline {{ logo === l[0] ? '' : 'light' }}">
@@ -121,7 +146,7 @@
           <label for="logo-placement" class="sr-only">Logo placement</label>
           <div class="button-group" id="logo-placement" role="group">
             {{#each Object.entries(logoPlacements) as l}}
-              <button on:click="proxySet(event, 'logoPlacement', l[0])" class="button-outline {{ logoPlacement === l[0] ? '' : 'light' }}">
+              <button on:click="proxySet(event, 'logoPlacement', l[0])" class="{{ logoPlacement === l[0] ? '' : 'light' }}">
                 {{{ l[1] }}}
               </button>
             {{/each}}
@@ -174,7 +199,8 @@ export default {
       'logoPlacement',
       'bgImage',
       'bgPlacement',
-      'dropShadow'
+      'dropShadow',
+      'textPlacement'
     ];
     this.observeMany(renderables, this.render, { init: false });
 
@@ -193,7 +219,7 @@ export default {
 
   data: () => {
     return {
-      quote: 'A quote would go here',
+      quote: '"A quote would go here."',
       attribution: 'A. Name',
       alignY: 'center',
       quoteAlignX: 'left',
@@ -275,7 +301,22 @@ export default {
           name: 'Fill'
         }
       },
-      bgPlacement: 'fill'
+      bgPlacement: 'fill',
+      textPlacements: {
+        top: {
+          description: 'Move quote and attribution to top',
+          name: 'Top'
+        },
+        middle: {
+          description: 'Move quote and attribution to the middle',
+          name: 'Middle'
+        },
+        bottom: {
+          description: 'Move quote and attribution to bottom',
+          name: 'Bottom'
+        }
+      },
+      textPlacement: 'middle'
     };
   },
 
@@ -469,9 +510,9 @@ export default {
 
       // Draw the text
       let lineY = canvas.height / 2 - height / 2 + this.get('quoteSize') / 2;
-      if (this.get('alignY') === 'top') {
-        lineY = padding + settings.size;
-      } else if (this.get('alignY') === 'bottom') {
+      if (this.get('textPlacement') === 'top') {
+        lineY = padding + this.get('quoteSize') / 2;
+      } else if (this.get('textPlacement') === 'bottom') {
         lineY = canvas.height - height - padding + this.get('quoteSize') / 2;
       }
       lines.forEach(l => {
