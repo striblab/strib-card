@@ -16,14 +16,18 @@
         <p>Use the controls below to create an image to use on social media.  Use the button at the bottom to download the image.</p>
 
         <form>
-          <h2>Format</h2>
-          <label for="size-select" class="sr-only">Size</label>
+          <h2>Layout</h2>
+          <label for="size-select">Size</label>
           <select id="size-select" bind:value="size">
             {{#each Object.entries(sizes) as [si, s]}}
               <option value="{{si}}">{{si}}</option>
             {{/each}}
           </select>
-          <small>Each site has its own aspect ratio and ideal size.</small>
+
+          <div class="form-element-inline">
+            <label for="padding">Padding</label>
+            <input id="padding" bind:value="padding" type="range" min="10" max="200">
+          </div>
 
 
           <h2>Quote</h2>
