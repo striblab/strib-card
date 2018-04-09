@@ -70,7 +70,8 @@ form {
     margin-bottom: $spacer / 0.85;
   }
 
-  input[type="range"] {
+  input[type="range"],
+  input[type="range"]:not([type="submit"]):not([type="reset"]):not([type="button"]) {
     border: none;
   }
 }
