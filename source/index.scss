@@ -26,7 +26,7 @@
   padding: 1em;
 }
 
-.ouput-preview {
+.output-preview {
   background-color: transparent;
 
   object-fit: contain;
@@ -84,6 +84,7 @@
   }
 }
 
-.download-placeholder {
+.download-placeholder,
+.preload-images {
   display: none;
 }

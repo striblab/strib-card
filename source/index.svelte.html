@@ -5,7 +5,7 @@
   <div class="strib-card cf">
     <div class="output">
       <div class="output-inner">
-        <canvas ref:output class="ouput-preview" width="1200" height="630"></canvas>
+        <canvas ref:output class="output-preview" width="1200" height="630"></canvas>
       </div>
     </div>
 
@@ -70,10 +70,43 @@
           <label for="background-color">Foreground color</label>
           <ColorPicker id="background-color" bind:color="foregroundColor" />
 
+          <label for="logo">Logo</label>
+          <div class="button-group" id="logo" role="group">
+            {{#each Object.entries(logos) as l}}
+              <button on:click="proxySet(event, 'logo', l[0])" class="button-outline {{ logo === l[0] ? '' : 'light' }}">
+                <i class="strib-icon strib-strib-star" style="color: {{ l[1].color }}"></i>
+                {{ l[1].suffix ? l[1].suffix : '' }}
+              </button>
+            {{/each}}
+
+            <button on:click="proxySet(event, 'logo', null)" class="button-outline {{ !logo ? '' : 'light' }}">
+              <i class="fa fa-close"></i><span class="sr-only">No logo</span>
+            </button>
+          </div>
+
+          <label for="logo-placement" class="sr-only">Logo placement</label>
+          <div class="button-group" id="logo-placement" role="group">
+            {{#each Object.entries(logoPlacements) as l}}
+              <button on:click="proxySet(event, 'logoPlacement', l[0])" class="button-outline {{ logoPlacement === l[0] ? '' : 'light' }}">
+                {{{ l[1] }}}
+              </button>
+            {{/each}}
+          </div>
+
+          <div class="form-element-inline">
+            <label for="logo-proportion">Logo size</label>
+            <input id="logo-proportion" bind:value="logoProportion" type="range" min="0.5" max="4" step="0.1">
+          </div>
+
           <button on:click="download(event)">Download</button>
           <a ref:download class="download-placeholder" href="#download" download="">Download placeholder</a>
-        </form>
 
+          <div class="preload-images">
+            {{#each logos as l}}
+              <img src="images/{{l}}.svg" alt="Star tribune logo">
+            {{/each}}
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -101,7 +134,10 @@ export default {
       'font',
       'backgroundColor',
       'foregroundColor',
-      'size'
+      'size',
+      'logo',
+      'logoProportion',
+      'logoPlacement'
     ];
     this.observeMany(renderables, this.render, { init: false });
 
@@ -148,7 +184,50 @@ export default {
         Twitter: [1024, 512],
         Instagram: [1080, 1080]
       },
-      size: 'Facebook'
+      size: 'Facebook',
+      logos: {
+        starBlack: {
+          file: 'strib-star-black.svg',
+          ratio: 65.6 / 58,
+          color: '#000000',
+          baseWidth: 75
+        },
+        starGreen: {
+          file: 'strib-star-green.svg',
+          ratio: 65.6 / 58,
+          color: '#00824a',
+          baseWidth: 75
+        },
+        starWhite: {
+          file: 'strib-star-white.svg',
+          ratio: 65.6 / 58,
+          color: '#EEEEEE',
+          baseWidth: 75
+        },
+        logoBlack: {
+          file: 'strib-logo-black.svg',
+          ratio: 160 / 25,
+          color: '#000000',
+          suffix: 'ST',
+          baseWidth: 225
+        },
+        logoWhite: {
+          file: 'strib-logo-white.svg',
+          ratio: 160 / 25,
+          color: '#EEEEEE',
+          suffix: 'ST',
+          baseWidth: 225
+        }
+      },
+      logo: 'starWhite',
+      logoProportion: 1,
+      logoPlacements: {
+        topLeft: '&boxdr;',
+        topRight: '&boxdl;',
+        bottomLeft: '&boxur;',
+        bottomRight: '&boxul;'
+      },
+      logoPlacement: 'bottomRight'
     };
   },
 
@@ -177,6 +256,7 @@ export default {
     render() {
       let canvas = this.refs.output;
       let context = canvas.getContext('2d');
+      let padding = this.get('padding');
 
       // Formatting
       let quote = this.get('quote')
@@ -198,11 +278,30 @@ export default {
       // TODO
 
       // Add logo
-      //
+      if (this.get('logo')) {
+        let logo = this.get('logos')[this.get('logo')];
+        let logoWidth = logo.baseWidth * parseFloat(this.get('logoProportion'));
+        let logoPlacement = this.get('logoPlacement');
+
+        let logoImage = new Image();
+        logoImage.src = `images/${logo.file}`;
+        logoImage.onload = () => {
+          context.drawImage(
+            logoImage,
+            logoPlacement === 'topLeft' || logoPlacement === 'bottomLeft'
+              ? padding
+              : canvas.width - padding - logoWidth,
+            logoPlacement === 'topLeft' || logoPlacement === 'topRight'
+              ? padding
+              : canvas.height - padding - logoWidth / logo.ratio,
+            logoWidth,
+            logoWidth / logo.ratio
+          );
+        };
+      }
 
       // Lay out the text
       context.fillStyle = this.get('foregroundColor');
-      let padding = this.get('padding');
       let maxWidth = canvas.width - padding * 2;
       let lines = this.layoutText(
         quote,
