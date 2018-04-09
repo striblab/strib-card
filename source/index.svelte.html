@@ -64,6 +64,33 @@
             <input id="attribution-size" bind:value="attributionSize" type="range" min="10" max="100">
           </div>
 
+          <label for="background-image">Background image</label>
+          <div ref:bgImage id="background-image"
+            on:dragover="proxySet(event, 'bgImageOver', true)"
+            on:dragenter="proxySet(event, 'bgImageOver', true)"
+            on:dragleave="proxySet(event, 'bgImageOver', false)"
+            on:dragend="proxySet(event, 'bgImageOver', false)"
+            on:drop="imageDrop(event)"
+            class="file-upload-container {{ bgImageOver ? 'drag-over' : '' }}">
+            <span>
+              <i class="fa fa-download"></i><br>
+              Drag file here
+            </span>
+          </div>
+
+          <label for="bg-placement" class="sr-only">Background image placement</label>
+          <div class="button-group" id="bg-placement" role="group">
+            {{#each Object.entries(bgPlacements) as l}}
+              <button on:click="proxySet(event, 'bgPlacement', l[0])" class="{{ bgPlacement === l[0] ? '' : 'light' }}" title="{{ l[1].description }}">
+                {{{ l[1].name }}}
+              </button>
+            {{/each}}
+
+            <button on:click="proxySet(event, 'bgImage', null)" class="button-outline {{ !bgImage ? '' : 'light' }}">
+              <i class="fa fa-close"></i><span class="sr-only">No background image</span>
+            </button>
+          </div>
+
           <label for="background-color">Background color</label>
           <ColorPicker id="background-color" bind:color="backgroundColor" />
 
@@ -137,7 +164,9 @@ export default {
       'size',
       'logo',
       'logoProportion',
-      'logoPlacement'
+      'logoPlacement',
+      'bgImage',
+      'bgPlacement'
     ];
     this.observeMany(renderables, this.render, { init: false });
 
@@ -227,12 +256,82 @@ export default {
         bottomLeft: '&boxur;',
         bottomRight: '&boxul;'
       },
-      logoPlacement: 'bottomRight'
+      logoPlacement: 'bottomRight',
+      bgPlacements: {
+        stretch: {
+          description: 'Stretch to fit canvas, does not preserve aspect ratio',
+          name: 'Stretch'
+        },
+        fill: {
+          description: 'Fill canvas, preserve ratio',
+          name: 'Fill'
+        }
+      },
+      bgPlacement: 'fill'
     };
   },
 
   methods: {
     observeMany,
+
+    // Upload image
+    imageDrop: async function(e) {
+      this.proxySet(e, 'bgImageOver', false);
+
+      if (e && e.dataTransfer && e.dataTransfer.files) {
+        let file = e.dataTransfer.files[0];
+
+        if (file.type.match(/image*/i)) {
+          let image = await this.loadImageFromFile(file);
+          this.set({ bgImage: image });
+        } else {
+          this.set({ bgImageError: 'Please provide an image file.' });
+        }
+      } else {
+        this.set({ bgImageError: 'No files found.' });
+      }
+    },
+
+    // Load image form file
+    loadImageFromFile: async function(f) {
+      return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+
+        // Wait for loading
+        reader.onload = () => {
+          // Make new image object and load
+          let image = new Image();
+          image.onload = () => {
+            resolve(image);
+          };
+          image.onerror = reject;
+
+          // Use reader result as image
+          image.src = reader.result;
+        };
+
+        // Handler error on file
+        reader.onerror = reject;
+
+        // Read actual file
+        reader.readAsDataURL(f);
+      });
+    },
+
+    // load image from URL
+    loadImage: async function(source) {
+      return new Promise((resolve, reject) => {
+        // Make new image object and load
+        let image = new Image();
+        image.onload = () => {
+          resolve(image);
+        };
+        image.onerror = reject;
+
+        // Use reader result as image
+        image.src = source;
+      });
+    },
 
     // Download
     download: function(e) {
@@ -253,7 +352,7 @@ export default {
     },
 
     // Main render function
-    render() {
+    render: async function() {
       let canvas = this.refs.output;
       let context = canvas.getContext('2d');
       let padding = this.get('padding');
@@ -275,7 +374,49 @@ export default {
       context.fillRect(0, 0, canvas.width, canvas.height);
 
       // Add the image
-      // TODO
+      if (this.get('bgImage')) {
+        let bgImage = this.get('bgImage');
+        let place = this.get('bgPlacement');
+        let draw = [0, 0, canvas.width, canvas.height];
+
+        // Stetch is easy
+        if (place === 'stretch') {
+          // Use default
+        } else if (place === 'fill') {
+          // Fill can be a bit complex
+          let bgRatio = bgImage.width / bgImage.height;
+          let canvasRatio = canvas.width / canvas.height;
+
+          console.log(bgRatio, canvasRatio);
+          if (bgRatio === canvasRatio) {
+            // Use default
+          } else if (bgRatio < canvasRatio) {
+            let scale = canvas.width / bgImage.width;
+            draw = [
+              0,
+              (bgImage.height * scale - canvas.height) / 2 * -1,
+              bgImage.width * scale,
+              bgImage.height * scale
+            ];
+          } else {
+            let scale = canvas.height / bgImage.height;
+            draw = [
+              (bgImage.width * scale - canvas.width) / 2 * -1,
+              0,
+              bgImage.width * scale,
+              bgImage.height * scale
+            ];
+          }
+        }
+
+        context.drawImage(
+          this.get('bgImage'),
+          draw[0],
+          draw[1],
+          draw[2],
+          draw[3]
+        );
+      }
 
       // Add logo
       if (this.get('logo')) {
@@ -283,21 +424,18 @@ export default {
         let logoWidth = logo.baseWidth * parseFloat(this.get('logoProportion'));
         let logoPlacement = this.get('logoPlacement');
 
-        let logoImage = new Image();
-        logoImage.src = `images/${logo.file}`;
-        logoImage.onload = () => {
-          context.drawImage(
-            logoImage,
-            logoPlacement === 'topLeft' || logoPlacement === 'bottomLeft'
-              ? padding
-              : canvas.width - padding - logoWidth,
-            logoPlacement === 'topLeft' || logoPlacement === 'topRight'
-              ? padding
-              : canvas.height - padding - logoWidth / logo.ratio,
-            logoWidth,
-            logoWidth / logo.ratio
-          );
-        };
+        let logoImage = await this.loadImage(`images/${logo.file}`);
+        context.drawImage(
+          logoImage,
+          logoPlacement === 'topLeft' || logoPlacement === 'bottomLeft'
+            ? padding
+            : canvas.width - padding - logoWidth,
+          logoPlacement === 'topLeft' || logoPlacement === 'topRight'
+            ? padding
+            : canvas.height - padding - logoWidth / logo.ratio,
+          logoWidth,
+          logoWidth / logo.ratio
+        );
       }
 
       // Lay out the text
@@ -408,6 +546,9 @@ export default {
     proxySet(e, k, v) {
       if (e && e.preventDefault) {
         e.preventDefault();
+      }
+      if (e && e.stopPropagation) {
+        e.stopPropagation();
       }
 
       this.set({ [k]: v });
