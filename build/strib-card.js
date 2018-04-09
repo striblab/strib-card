@@ -18,7 +18,7 @@
 /*!*************************!*\
   !*** ./source/index.js ***!
   \*************************/
-/*! no exports provided */function(e,t,n){"use strict";n.r(t);new(n(/*! ./index.svelte.html */"./source/index.svelte.html").default)({target:document.querySelector(".strib-card-container"),data:{}})},"./source/index.svelte.html":
+/*! no static exports found */function(e,t,n){"use strict";var c,a=n(/*! ./index.svelte.html */"./source/index.svelte.html");new((c=a)&&c.__esModule?c:{default:c}).default({target:document.querySelector(".strib-card-container"),data:{}})},"./source/index.svelte.html":
 /*!**********************************!*\
   !*** ./source/index.svelte.html ***!
   \**********************************/

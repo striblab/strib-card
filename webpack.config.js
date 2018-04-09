@@ -21,6 +21,7 @@ module.exports = {
         test: /source\/.*\.js$/,
         loader: 'babel-loader',
         options: {
+          presets: ['env'],
           cacheDirectory: true
         }
       },
