@@ -84,6 +84,23 @@
           </small>
 
 
+          <h2>Link</h2>
+          <label for="link-input" class="sr-only" aria-describedby="link-input-help">Link</label>
+          <input type="text" id="link-input" bind:value="link" placeholder="startribune.com/example">
+          <small id="link-input-help">
+            Leave blank to omit link all together.
+          </small>
+
+          <div class="form-element-inline">
+            <label for="link-size">Link size</label>
+            <input id="link-size" bind:value="linkSize" type="range" min="25" max="100" step="5" aria-describedby="link-size-help">
+            <span class="inline-value-output">{{ linkSize }}%</span>
+          </div>
+          <small id="link-size-help">
+            As a precentage of body size.
+          </small>
+
+
           <h2>Text</h2>
           <label for="body-font">Font</label>
           <div class="button-group button-group-small" id="body-font" role="group">
@@ -145,10 +162,12 @@
 
           <h2>Colors</h2>
           <label for="background-color">Background color</label>
-          <ColorPicker id="background-color" bind:color="backgroundColor" />
+          <ColorPicker id="background-color" bind:color="backgroundColor"
+            colors="{{ backgroundColors }}" />
 
           <label for="background-color">Foreground color</label>
-          <ColorPicker id="background-color" bind:color="foregroundColor" />
+          <ColorPicker id="background-color" bind:color="foregroundColor"
+            colors="{{ foregroundColors }}" />
 
 
           <h2>Logo</h2>
@@ -177,7 +196,19 @@
 
           <div class="form-element-inline">
             <label for="logo-proportion">Logo size</label>
-            <input id="logo-proportion" bind:value="logoProportion" type="range" min="0.5" max="4" step="0.1">
+            <input id="logo-proportion" bind:value="logoProportion" type="range" min="0.5" max="4" step="0.1" aria-describedby="logo-proportion-help">
+            <span class="inline-value-output">{{ logoProportion }}x</span>
+          </div>
+          <small id="logo-proportion-help">
+            As a proportion of the original size.
+          </small>
+
+          <h2>Advanced</h2>
+          <div class="check-list">
+            <div class="check">
+              <input type="checkbox" id="draw-grid" name="draw-grid" bind:checked="drawGrid">
+              <label for="draw-grid">Draw grid</label>
+            </div>
           </div>
 
           <button on:click="download(event)">Download</button>
@@ -209,10 +240,12 @@ export default {
     let renderables = [
       'body',
       'attribution',
+      'link',
       'bodyAlignX',
       'padding',
       'bodySize',
       'attributionSize',
+      'linkSize',
       'font',
       'backgroundColor',
       'foregroundColor',
@@ -223,7 +256,8 @@ export default {
       'bgImage',
       'bgPlacement',
       'dropShadow',
-      'textPlacement'
+      'textPlacement',
+      'drawGrid'
     ];
     this.observeMany(renderables, this.render, { init: false });
     this.render();
@@ -244,9 +278,34 @@ export default {
     return {
       body: '"A body would go here."',
       attribution: 'A. Name',
+      link: 'startribune.com/example',
       alignY: 'center',
       bodyAlignX: 'left',
-      backgroundColor: '#7ABDFF',
+      backgroundColors: [
+        '#000000',
+        '#FFFFFF',
+        '#686868',
+        '#CACACA',
+        '#005825',
+        '#00824a',
+        '#8dc63f'
+        //'#003366',
+        //'#7ABDFF',
+        //'#fffc19',
+        //'#CCC900',
+        //'#9d5d00',
+        //'#9e003f'
+      ],
+      backgroundColor: '#005825',
+      foregroundColors: [
+        '#000000',
+        '#FFFFFF',
+        '#686868',
+        '#CACACA',
+        '#005825',
+        '#00824a',
+        '#8dc63f'
+      ],
       foregroundColor: '#FFFFFF',
       fonts: [
         'Benton Sans',
@@ -265,6 +324,7 @@ export default {
       bodySize: 5,
       lineHeight: 1.25,
       attributionSize: 75,
+      linkSize: 35,
       padding: 5,
       sizes: {
         // https://sproutsocial.com/insights/social-media-image-sizes-guide/
@@ -311,10 +371,12 @@ export default {
       logo: 'starWhite',
       logoProportion: 1,
       logoPlacements: {
-        topLeft: '&boxdr;',
-        topRight: '&boxdl;',
-        bottomLeft: '&boxur;',
-        bottomRight: '&boxul;'
+        topLeft: '◰',
+        topRight: '◳',
+        bottomLeft: '◱',
+        bottomRight: '◲',
+        topMiddle: '┳',
+        bottomMiddle: '┻'
       },
       logoPlacement: 'bottomRight',
       bgPlacements: {
@@ -342,7 +404,10 @@ export default {
           name: 'Bottom'
         }
       },
-      textPlacement: 'middle'
+      textPlacement: 'middle',
+      drawGrid: false,
+      filenameID: 0,
+      debuggable: true
     };
   },
 
@@ -414,16 +479,21 @@ export default {
         e.preventDefault();
       }
 
-      // Make sure render is correct
+      // Make sure render is correct, turn off any debugging
+      this.set({ debuggable: false });
       await this.render();
+      this.set({ debuggable: true });
 
       // Put together download
       let canvas = this.refs.output;
       let download = this.refs.download;
       let data = canvas.toDataURL();
       download.href = data;
-      download.download = 'make-name-TODO.png';
+      download.download = this.filename(this.get('body')) + '.png';
       download.click();
+
+      // Re-render, as we may have changed it for debugging.
+      await this.render();
     },
 
     // Main render function
@@ -506,10 +576,21 @@ export default {
           logoImage,
           logoPlacement === 'topLeft' || logoPlacement === 'bottomLeft'
             ? padding
-            : canvas.width - padding - logoWidth,
-          logoPlacement === 'topLeft' || logoPlacement === 'topRight'
+            : logoPlacement === 'topRight' || logoPlacement === 'bottomRight'
+              ? canvas.width - padding - logoWidth
+              : logoPlacement === 'topMiddle' ||
+                logoPlacement === 'bottomMiddle'
+                ? canvas.width / 2 - logoWidth / 2
+                : 0,
+          logoPlacement === 'topLeft' ||
+          logoPlacement === 'topRight' ||
+          logoPlacement === 'topMiddle'
             ? padding
-            : canvas.height - padding - logoWidth / logo.ratio,
+            : logoPlacement === 'bottomLeft' ||
+              logoPlacement === 'bottomRight' ||
+              logoPlacement === 'bottomMiddle'
+              ? canvas.height - padding - logoWidth / logo.ratio
+              : 0,
           logoWidth,
           logoWidth / logo.ratio
         );
@@ -521,6 +602,7 @@ export default {
       let maxWidth = canvas.width - padding * 2;
       let lines = this.layoutText(body, maxWidth, this.get('font'), bodySize);
 
+      // Attribution
       if (attribution) {
         let attrLines = this.layoutText(
           '    — ' + attribution,
@@ -532,7 +614,19 @@ export default {
         lines = lines.concat(attrLines);
       }
 
-      // Make line height
+      // Link
+      if (this.get('link')) {
+        let attrLines = this.layoutText(
+          this.get('link'),
+          maxWidth,
+          this.get('font'),
+          parseFloat(this.get('linkSize')) / 100 * parseFloat(bodySize)
+        );
+        attrLines.forEach(l => (l.alignment = 'right'));
+        lines = lines.concat(attrLines);
+      }
+
+      // Get height of all lines
       let height = lines.reduce((t, l) => {
         return t + l.size * this.get('lineHeight');
       }, 0);
@@ -540,7 +634,7 @@ export default {
       // Draw the text, determine where to start drawing
       let lineY = canvas.height / 2 - height / 2 + bodySize / 2;
       if (this.get('textPlacement') === 'top') {
-        lineY = padding + bodySize / 2;
+        lineY = padding + bodySize * this.get('lineHeight') / 2;
       } else if (this.get('textPlacement') === 'bottom') {
         lineY = canvas.height - height - padding + bodySize / 2;
       }
@@ -554,18 +648,62 @@ export default {
         } else if (alignment == 'center') {
           x = canvas.width / 2;
         }
+
+        if (this.get('debuggable') && this.get('drawGrid')) {
+          context.beginPath();
+          context.strokeStyle = 'green';
+          context.lineWidth = 1;
+          context.moveTo(0, lineY);
+          context.lineTo(canvas.width, lineY);
+          context.stroke();
+        }
+
+        context.textBaseline = 'middle';
         context.textAlign = alignment;
         context.font = `${l.size}px ${this.get('font')}`;
 
         if (this.get('dropShadow')) {
           context.shadowOffsetX = 4;
           context.shadowOffsetY = 4;
-          context.shadowColor = 'rgba(0, 0, 0, 0.8)';
+          context.shadowColor = 'rgba(0, 0, 0, 0.7)';
           context.shadowBlur = 15;
         }
 
         context.fillText(l.text, x, lineY);
         lineY += l.size * this.get('lineHeight');
+      });
+
+      // Draw grid for debugging
+      if (this.get('debuggable') && this.get('drawGrid')) {
+        this.drawGrid(canvas, context);
+      }
+    },
+
+    // Draw grid, for debugging
+    drawGrid(canvas, context) {
+      let w = canvas.width;
+      let h = canvas.height;
+      let p = canvas.width * parseFloat(this.get('padding') / 100);
+
+      let lines = [];
+      // Padding lines
+      lines.push([0, p, w, p]);
+      lines.push([0, h - p, w, h - p]);
+      lines.push([p, 0, p, h]);
+      lines.push([w - p, 0, w - p, h]);
+
+      // Center lines
+      lines.push([w / 2, 0, w / 2, h]);
+      lines.push([0, h / 2, w, h / 2]);
+
+      // Draw lines
+      lines.forEach(l => {
+        context.beginPath();
+        context.strokeStyle = 'yellow';
+        context.lineWidth = 1;
+        context.moveTo(l[0], l[1]);
+        context.lineTo(l[2], l[3]);
+        context.stroke();
       });
     },
 
@@ -650,6 +788,25 @@ export default {
       }
 
       this.set({ [k]: !this.get(k) });
+    },
+
+    // Make filename
+    filename(input) {
+      let id = this.get('filenameID');
+      this.set({ filenameID: id + 1 });
+      input = input || 'media-file';
+      return (
+        input
+          .toLowerCase()
+          .replace(/[\W_]+/g, '-')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-/g, '')
+          .replace(/-$/g, '')
+          .substring(0, 24) +
+        '-' +
+        id
+      );
     }
   },
 
