@@ -6,6 +6,10 @@
     <div class="output">
       <div class="output-inner">
         <canvas ref:output class="output-preview" width="1200" height="630"></canvas>
+
+        <div class="app-messages">
+          {{{ appMessages ? appMessages : '&nbsp' }}}
+        </div>
       </div>
     </div>
 
@@ -26,48 +30,63 @@
 
           <div class="form-element-inline">
             <label for="padding">Padding</label>
-            <input id="padding" bind:value="padding" type="range" min="10" max="200">
+            <input id="padding" bind:value="padding" type="range" min="1" max="25" step="1" aria-describedby="padding-help">
+            <span class="inline-value-output">{{ padding }}%</span>
           </div>
+          <small id="padding-help">
+            As a precentage of the width of the canvas.
+          </small>
 
 
-          <h2>Quote</h2>
-          <label for="quote-input" class="sr-only">Quote</label>
-          <textarea id="quote-input" bind:value="quote"></textarea>
+          <h2>Body</h2>
+          <label for="body-input" class="sr-only">Body</label>
+          <textarea id="body-input" bind:value="body"></textarea>
 
-          <label for="quote-alignment" class="sr-only">Quote alignment</label>
-          <div class="button-group" id="quote-alignment" role="group">
-            <button on:click="proxySet(event, 'quoteAlignX', 'left')" class="{{ quoteAlignX === 'left' ? '' : 'light' }}">
+          <label for="body-alignment" class="sr-only">Body alignment</label>
+          <div class="button-group" id="body-alignment" role="group">
+            <button on:click="proxySet(event, 'bodyAlignX', 'left')" class="{{ bodyAlignX === 'left' ? '' : 'light' }}">
               <i class="fa fa-align-left"></i><span class="sr-only">Left</span>
             </button>
 
-            <button on:click="proxySet(event, 'quoteAlignX', 'center')" class="{{ quoteAlignX === 'center' ? '' : 'light' }}">
+            <button on:click="proxySet(event, 'bodyAlignX', 'center')" class="{{ bodyAlignX === 'center' ? '' : 'light' }}">
               <i class="fa fa-align-center"></i><span class="sr-only">Center</span>
             </button>
 
-            <button on:click="proxySet(event, 'quoteAlignX', 'right')" class="{{ quoteAlignX === 'right' ? '' : 'light' }}">
+            <button on:click="proxySet(event, 'bodyAlignX', 'right')" class="{{ bodyAlignX === 'right' ? '' : 'light' }}">
               <i class="fa fa-align-right"></i><span class="sr-only">Center</span>
             </button>
           </div>
 
           <div class="form-element-inline">
-            <label for="quote-size">Quote size</label>
-            <input id="quote-size" bind:value="quoteSize" type="range" min="10" max="100">
+            <label for="body-size">Body size</label>
+            <input id="body-size" bind:value="bodySize" type="range" min="1" max="25" step="1" aria-describedby="body-size-help">
+            <span class="inline-value-output">{{ bodySize }}%</span>
           </div>
+          <small id="body-size-help">
+            As a precentage of the width of the canvas.
+          </small>
 
 
           <h2>Attribution</h2>
-          <label for="attribution-input" class="sr-only">Attribution</label>
+          <label for="attribution-input" class="sr-only" aria-describedby="attribution-input-help">Attribution</label>
           <input type="text" id="attribution-input" bind:value="attribution">
+          <small id="attribution-input-help">
+            Leave blank to omit attribution all together.
+          </small>
 
           <div class="form-element-inline">
             <label for="attribution-size">Attribution size</label>
-            <input id="attribution-size" bind:value="attributionSize" type="range" min="10" max="100">
+            <input id="attribution-size" bind:value="attributionSize" type="range" min="25" max="100" step="5" aria-describedby="attribution-size-help">
+            <span class="inline-value-output">{{ attributionSize }}%</span>
           </div>
+          <small id="attribution-size-help">
+            As a precentage of body size.
+          </small>
 
 
           <h2>Text</h2>
-          <label for="quote-font">Font</label>
-          <div class="button-group button-group-small" id="quote-font" role="group">
+          <label for="body-font">Font</label>
+          <div class="button-group button-group-small" id="body-font" role="group">
             {{#each fonts as f}}
               <button on:click="proxySet(event, 'font', f)"
                 class="{{ font === f ? '' : 'light' }}"
@@ -188,11 +207,11 @@ export default {
   oncreate: function() {
     // All the observes that should cause render
     let renderables = [
-      'quote',
+      'body',
       'attribution',
-      'quoteAlignX',
+      'bodyAlignX',
       'padding',
-      'quoteSize',
+      'bodySize',
       'attributionSize',
       'font',
       'backgroundColor',
@@ -207,49 +226,52 @@ export default {
       'textPlacement'
     ];
     this.observeMany(renderables, this.render, { init: false });
+    this.render();
 
     // Wait for fonts to load, set message
-    let defaultQuote = this.get('quote');
-    this.set({ quote: 'Loading fonts...' });
+    this.set({ appMessages: 'Loading fonts...' });
     WebFont.load({
       custom: {
         families: this.get('fonts')
       },
       active: () => {
-        this.set({ quote: defaultQuote });
+        this.set({ appMessages: '' });
       }
     });
   },
 
   data: () => {
     return {
-      quote: '"A quote would go here."',
+      body: '"A body would go here."',
       attribution: 'A. Name',
       alignY: 'center',
-      quoteAlignX: 'left',
+      bodyAlignX: 'left',
       backgroundColor: '#7ABDFF',
       foregroundColor: '#FFFFFF',
       fonts: [
         'Benton Sans',
-        'Benton Sans Condensed',
+        //'Benton Sans Condensed',
         'Popular',
         'Popular Light',
         'Popular Medium',
-        'Poynter Serif',
+        //'Poynter Serif',
         'Whitman Display',
-        'Whitman Display Condensed Bold',
-        'Whitman Display Compressed Bold',
-        'Whitman OSF',
-        'Menlo'
+        //'Whitman Display Condensed Bold',
+        //'Whitman Display Compressed Bold',
+        'Whitman OSF'
+        //'Menlo'
       ],
       font: 'Benton Sans',
-      quoteSize: 56,
-      attributionSize: 40,
-      padding: 50,
+      bodySize: 5,
+      lineHeight: 1.25,
+      attributionSize: 75,
+      padding: 5,
       sizes: {
+        // https://sproutsocial.com/insights/social-media-image-sizes-guide/
         Facebook: [1200, 630],
         Twitter: [1024, 512],
-        Instagram: [1080, 1080]
+        Instagram: [1080, 1080],
+        'Instagram Stories': [1080, 1920]
       },
       size: 'Facebook',
       logos: {
@@ -308,15 +330,15 @@ export default {
       bgPlacement: 'fill',
       textPlacements: {
         top: {
-          description: 'Move quote and attribution to top',
+          description: 'Move body and attribution to top',
           name: 'Top'
         },
         middle: {
-          description: 'Move quote and attribution to the middle',
+          description: 'Move body and attribution to the middle',
           name: 'Middle'
         },
         bottom: {
-          description: 'Move quote and attribution to bottom',
+          description: 'Move body and attribution to bottom',
           name: 'Bottom'
         }
       },
@@ -411,7 +433,7 @@ export default {
       let padding = this.get('padding');
 
       // Formatting
-      let quote = this.get('quote')
+      let body = this.get('body')
         .trim()
         .replace(/"(\w)/g, '“$1')
         .replace(/(\S)"/g, '$1”')
@@ -421,6 +443,9 @@ export default {
       // Set up canvas
       canvas.width = this.get('sizes')[this.get('size')][0];
       canvas.height = this.get('sizes')[this.get('size')][1];
+
+      // Calculate padding
+      padding = canvas.width * parseFloat(padding / 100);
 
       // Set the background color
       context.fillStyle = this.get('backgroundColor');
@@ -491,37 +516,39 @@ export default {
       }
 
       // Lay out the text
+      let bodySize = parseFloat(this.get('bodySize')) / 100 * canvas.width;
       context.fillStyle = this.get('foregroundColor');
       let maxWidth = canvas.width - padding * 2;
-      let lines = this.layoutText(
-        quote,
-        maxWidth,
-        this.get('font'),
-        this.get('quoteSize')
-      );
+      let lines = this.layoutText(body, maxWidth, this.get('font'), bodySize);
 
-      let attrLines = this.layoutText(
-        '    — ' + attribution,
-        maxWidth,
-        this.get('font'),
-        this.get('attributionSize')
-      );
-      attrLines.forEach(l => (l.alignment = 'right'));
-      lines = lines.concat(attrLines);
+      if (attribution) {
+        let attrLines = this.layoutText(
+          '    — ' + attribution,
+          maxWidth,
+          this.get('font'),
+          parseFloat(this.get('attributionSize')) / 100 * parseFloat(bodySize)
+        );
+        attrLines.forEach(l => (l.alignment = 'right'));
+        lines = lines.concat(attrLines);
+      }
+
+      // Make line height
       let height = lines.reduce((t, l) => {
-        return t + l.size * 1.2;
+        return t + l.size * this.get('lineHeight');
       }, 0);
 
-      // Draw the text
-      let lineY = canvas.height / 2 - height / 2 + this.get('quoteSize') / 2;
+      // Draw the text, determine where to start drawing
+      let lineY = canvas.height / 2 - height / 2 + bodySize / 2;
       if (this.get('textPlacement') === 'top') {
-        lineY = padding + this.get('quoteSize') / 2;
+        lineY = padding + bodySize / 2;
       } else if (this.get('textPlacement') === 'bottom') {
-        lineY = canvas.height - height - padding + this.get('quoteSize') / 2;
+        lineY = canvas.height - height - padding + bodySize / 2;
       }
+
+      // Draw each line
       lines.forEach(l => {
         let x = padding;
-        let alignment = l.alignment || this.get('quoteAlignX');
+        let alignment = l.alignment || this.get('bodyAlignX');
         if (alignment == 'right') {
           x = canvas.width - padding;
         } else if (alignment == 'center') {
@@ -538,7 +565,7 @@ export default {
         }
 
         context.fillText(l.text, x, lineY);
-        lineY += l.size * 1.2;
+        lineY += l.size * this.get('lineHeight');
       });
     },
 

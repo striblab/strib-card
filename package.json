@@ -24,14 +24,13 @@
   },
   "watch": {
     "build": {
-      "patterns": [
-        "source/**/*.*"
-      ]
+      "patterns": ["source/**/*.*"]
     }
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack && cp ./source/index.html ./build/index.html && cp -r ./source/images ./build/ && node-sass ./source/index.scss --source-map true > ./build/strib-card.css",
+    "build":
+      "webpack && cp ./source/index.html ./build/index.html && cp -r ./source/images ./build/ && node-sass ./source/index.scss --source-map true > ./build/strib-card.css",
     "server": "browser-sync start --ss build -f build",
     "develop": "concurrently \"npm-watch\" \"npm run server\""
   },

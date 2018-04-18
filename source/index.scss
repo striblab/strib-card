@@ -35,6 +35,12 @@
   max-height: 90vh;
 }
 
+.app-messages {
+  text-align: center;
+  color: $color-white;
+  font-size: 0.85em;
+}
+
 h1 {
   font-size: 2em;
   margin-top: 0;
@@ -73,6 +79,7 @@ form {
   input[type="range"],
   input[type="range"]:not([type="submit"]):not([type="reset"]):not([type="button"]) {
     border: none;
+    padding: 0;
   }
 }
 
@@ -104,6 +111,16 @@ form {
   label {
     white-space: nowrap;
     padding-right: 1em;
+  }
+
+  .inline-value-output {
+    display: inline-block;
+    padding-left: 0.85em;
+    font-size: 0.85em;
+  }
+
+  & ~ small {
+    margin-top: -1em;
   }
 }
 
