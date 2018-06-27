@@ -1,5 +1,5 @@
 
-@import '../node_modules/strib-styles/source/styles/default.scss';
+@import '../node_modules/@striblab/strib-styles/source/styles/default.scss';
 
 .output,
 .controls {
@@ -9,7 +9,7 @@
 
 .output {
   width: 66.66665%;
-  background-color: map-get($grays, 'darker');
+  background-color: map-get($grays, 'darkest');
   position: relative;
   z-index: -99;
 }

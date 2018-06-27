@@ -7,6 +7,7 @@
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {
+    "@striblab/strib-styles": "^0.10.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.6.1",
     "browser-sync": "^2.23.6",
@@ -14,23 +15,23 @@
     "eslint": "^4.19.1",
     "node-sass": "^4.8.3",
     "npm-watch": "^0.3.0",
-    "strib-styles": "git+https://github.com/striblab/strib-styles",
-    "svelte": "^1.60.2",
-    "svelte-extras": "^1.6.0",
-    "svelte-loader": "^2.7.0",
+    "svelte": "^2.8.1",
+    "svelte-extras": "^2.0.2",
+    "svelte-loader": "^2.9.1",
     "uglifyjs-webpack-plugin": "^1.2.4",
     "webpack": "^4.5.0",
     "webpack-cli": "^2.0.14"
   },
   "watch": {
     "build": {
-      "patterns": ["source/**/*.*"]
+      "patterns": [
+        "source/**/*.*"
+      ]
     }
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build":
-      "webpack && cp ./source/index.html ./build/index.html && cp -r ./source/images ./build/ && node-sass ./source/index.scss --source-map true > ./build/strib-card.css",
+    "build": "webpack && cp ./source/index.html ./build/index.html && cp -r ./source/images ./build/ && node-sass ./source/index.scss --source-map true > ./build/strib-card.css",
     "server": "browser-sync start --ss build -f build",
     "develop": "concurrently \"npm-watch\" \"npm run server\""
   },
