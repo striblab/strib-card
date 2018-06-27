@@ -74,6 +74,21 @@
             Leave blank to omit attribution all together.
           </small>
 
+          <label for="attribution-alignment" class="sr-only">Attribution alignment</label>
+          <div class="button-group" id="attribution-alignment" role="group">
+            <button on:click="proxySet(event, 'attributionAlignX', 'left')" class="{ attributionAlignX === 'left' ? '' : 'light' }">
+              <i class="fa fa-align-left"></i><span class="sr-only">Left</span>
+            </button>
+
+            <button on:click="proxySet(event, 'attributionAlignX', 'center')" class="{ attributionAlignX === 'center' ? '' : 'light' }">
+              <i class="fa fa-align-center"></i><span class="sr-only">Center</span>
+            </button>
+
+            <button on:click="proxySet(event, 'attributionAlignX', 'right')" class="{ attributionAlignX === 'right' ? '' : 'light' }">
+              <i class="fa fa-align-right"></i><span class="sr-only">Center</span>
+            </button>
+          </div>
+
           <div class="form-element-inline">
             <label for="attribution-size">Attribution size</label>
             <input id="attribution-size" bind:value="attributionSize" type="range" min="25" max="100" step="5" aria-describedby="attribution-size-help">
@@ -90,6 +105,21 @@
           <small id="link-input-help">
             Leave blank to omit link all together.
           </small>
+
+          <label for="link-alignment" class="sr-only">Link alignment</label>
+          <div class="button-group" id="link-alignment" role="group">
+            <button on:click="proxySet(event, 'linkAlignX', 'left')" class="{ linkAlignX === 'left' ? '' : 'light' }">
+              <i class="fa fa-align-left"></i><span class="sr-only">Left</span>
+            </button>
+
+            <button on:click="proxySet(event, 'linkAlignX', 'center')" class="{ linkAlignX === 'center' ? '' : 'light' }">
+              <i class="fa fa-align-center"></i><span class="sr-only">Center</span>
+            </button>
+
+            <button on:click="proxySet(event, 'linkAlignX', 'right')" class="{ linkAlignX === 'right' ? '' : 'light' }">
+              <i class="fa fa-align-right"></i><span class="sr-only">Center</span>
+            </button>
+          </div>
 
           <div class="form-element-inline">
             <label for="link-size">Link size</label>
@@ -242,6 +272,8 @@
         "attribution",
         "link",
         "bodyAlignX",
+        "attributionAlignX",
+        "linkAlignX",
         "padding",
         "bodySize",
         "attributionSize",
@@ -281,6 +313,8 @@
         link: "startribune.com/example",
         alignY: "center",
         bodyAlignX: "left",
+        attributionAlignX: "right",
+        linkAlignX: "right",
         backgroundColors: [
           "#000000",
           "#FFFFFF",
@@ -610,7 +644,7 @@
             this.get().font,
             parseFloat(this.get().attributionSize) / 100 * bodySize
           );
-          attrLines.forEach(l => (l.alignment = "right"));
+          attrLines.forEach(l => (l.alignment = this.get().attributionAlignX));
           lines = lines.concat(attrLines);
         }
 
@@ -622,7 +656,7 @@
             this.get().font,
             parseFloat(this.get().linkSize) / 100 * bodySize
           );
-          attrLines.forEach(l => (l.alignment = "right"));
+          attrLines.forEach(l => (l.alignment = this.get().linkAlignX));
           lines = lines.concat(attrLines);
         }
 
