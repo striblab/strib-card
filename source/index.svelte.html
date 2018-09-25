@@ -20,6 +20,17 @@
         <p>Use the controls below to create an image to use on social media.  Use the button at the bottom to download the image.</p>
 
         <form>
+          <h2>Presets</h2>
+          <div class="presets cf">
+            {#each Object.entries(presets) as [pi, preset]}
+              <div class="preset" on:click="setPreset(pi)">
+                <img src="./images/presets/preset-{ pi }.png" alt="Preview image for '{ preset.name }'">
+                <span>{ preset.name }</span>
+              </div>
+            {/each}
+          </div>
+
+
           <h2>Layout</h2>
           <label for="size-select">Size</label>
           <select id="size-select" bind:value="size">
@@ -99,7 +110,7 @@
           </small>
 
 
-          <h2>Link</h2>
+          <h2>Link or credit</h2>
           <label for="link-input" class="sr-only" aria-describedby="link-input-help">Link</label>
           <input type="text" id="link-input" bind:value="link" placeholder="startribune.com/example">
           <small id="link-input-help">
@@ -357,7 +368,7 @@
         font: "Benton Sans",
         bodySize: 5,
         lineHeight: 1.25,
-        attributionSize: 75,
+        attributionSize: 70,
         linkSize: 35,
         padding: 5,
         sizes: {
@@ -441,12 +452,48 @@
         textPlacement: "middle",
         drawGrid: false,
         filenameID: 0,
-        debuggable: true
+        debuggable: true,
+        // Presets
+        presets: {
+          default: {
+            name: "Default",
+            properties: s => {
+              return {
+                backgroundColor: "#005825",
+                foregroundColor: "#FFFFFF",
+                logo: "starWhite",
+                logoPlacement: "bottomRight"
+              };
+            }
+          },
+          white: {
+            name: "White",
+            properties: s => {
+              return {
+                backgroundColor: "#FFFFFF",
+                foregroundColor: "#000000",
+                logo: "logoBlack",
+                logoPlacement: "bottomLeft"
+              };
+            }
+          }
+        }
       };
     },
 
     methods: {
       observeMany,
+
+      // Set a preset
+      setPreset(preset) {
+        let presets = this.get().presets;
+        if (!presets[preset]) {
+          // Not there
+          return;
+        }
+
+        this.set(presets[preset].properties(this.get()));
+      },
 
       // Upload image
       imageDrop: async function(e) {
@@ -549,7 +596,7 @@
         canvas.height = this.get().sizes[this.get().size][1];
 
         // Calculate padding
-        padding = canvas.width * parseFloat(padding) / 100;
+        padding = (canvas.width * parseFloat(padding)) / 100;
 
         // Set the background color
         context.fillStyle = this.get().backgroundColor;
@@ -575,14 +622,14 @@
               let scale = canvas.width / bgImage.width;
               draw = [
                 0,
-                (bgImage.height * scale - canvas.height) / 2 * -1,
+                ((bgImage.height * scale - canvas.height) / 2) * -1,
                 bgImage.width * scale,
                 bgImage.height * scale
               ];
             } else {
               let scale = canvas.height / bgImage.height;
               draw = [
-                (bgImage.width * scale - canvas.width) / 2 * -1,
+                ((bgImage.width * scale - canvas.width) / 2) * -1,
                 0,
                 bgImage.width * scale,
                 bgImage.height * scale
@@ -631,7 +678,7 @@
         }
 
         // Lay out the text
-        let bodySize = parseFloat(this.get().bodySize) / 100 * canvas.width;
+        let bodySize = (parseFloat(this.get().bodySize) / 100) * canvas.width;
         context.fillStyle = this.get().foregroundColor;
         let maxWidth = canvas.width - padding * 2;
         let lines = this.layoutText(body, maxWidth, this.get().font, bodySize);
@@ -642,7 +689,7 @@
             "    — " + attribution,
             maxWidth,
             this.get().font,
-            parseFloat(this.get().attributionSize) / 100 * bodySize
+            (parseFloat(this.get().attributionSize) / 100) * bodySize
           );
           attrLines.forEach(l => (l.alignment = this.get().attributionAlignX));
           lines = lines.concat(attrLines);
@@ -654,7 +701,7 @@
             this.get().link,
             maxWidth,
             this.get().font,
-            parseFloat(this.get().linkSize) / 100 * bodySize
+            (parseFloat(this.get().linkSize) / 100) * bodySize
           );
           attrLines.forEach(l => (l.alignment = this.get().linkAlignX));
           lines = lines.concat(attrLines);
@@ -668,7 +715,7 @@
         // Draw the text, determine where to start drawing
         let lineY = canvas.height / 2 - height / 2 + bodySize / 2;
         if (this.get().textPlacement === "top") {
-          lineY = padding + bodySize * this.get().lineHeight / 2;
+          lineY = padding + (bodySize * this.get().lineHeight) / 2;
         } else if (this.get().textPlacement === "bottom") {
           lineY = canvas.height - height - padding + bodySize / 2;
         }
@@ -717,7 +764,7 @@
       drawGrid(canvas, context) {
         let w = canvas.width;
         let h = canvas.height;
-        let p = canvas.width * parseFloat(this.get().padding) / 100;
+        let p = (canvas.width * parseFloat(this.get().padding)) / 100;
 
         let lines = [];
         // Padding lines

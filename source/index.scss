@@ -1,5 +1,4 @@
-
-@import '../node_modules/@striblab/strib-styles/source/styles/default.scss';
+@import "../node_modules/@striblab/strib-styles/source/styles/default.scss";
 
 .output,
 .controls {
@@ -17,7 +16,7 @@
 .controls {
   width: 33.33332%;
   overflow-y: auto;
-  border-left: 1px solid map-get($grays, 'medium');
+  border-left: 1px solid map-get($grays, "medium");
   z-index: 99;
 }
 
@@ -57,6 +56,31 @@ h2 {
   font-weight: bold;
 }
 
+.presets {
+  margin-bottom: 1em;
+
+  .preset {
+    width: 33.33332%;
+    margin: 0 0.5em 0.5em 0;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    float: left;
+
+    img {
+      margin-bottom: 0.15em;
+      outline: 1px solid #bfbfbf;
+    }
+
+    span {
+      display: block;
+      text-align: center;
+    }
+
+    &:hover {
+      border-bottom: 2px solid #252525;
+    }
+  }
+}
 
 form {
   button,
@@ -148,14 +172,14 @@ form {
 }
 
 .file-upload-container {
-  border: 3px dashed map-get($grays, 'medium');
+  border: 3px dashed map-get($grays, "medium");
   border-radius: 0.5em;
   font-style: italic;
   font-size: 0.85em;
   padding: 2em 1em;
   text-align: center;
   margin-bottom: 1.25em;
-  background-color: map-get($grays, 'lighter');
+  background-color: map-get($grays, "lighter");
 
   &.drag-over {
     background-color: $color-white;
